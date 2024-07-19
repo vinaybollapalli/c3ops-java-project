@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        TF_CLI_ARGS = "-no-color"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Example: Checkout your source code repository
+                git 'https://github.com/your/repository.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                script {
+                    // Install Terraform (if needed)
+                    // sh 'curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -'
+                    // sh 'sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"'
+                    // sh 'sudo apt-get update && sudo apt-get install terraform'
+
+                    // Initialize Terraform
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    // Validate Terraform configurations (optional)
+                    sh 'terraform validate'
+
+                    // Generate and save execution plan
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    // Apply Terraform changes (auto-approve)
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Destroy') {
+            steps {
+                script {
+                    // Destroy Terraform resources (optional)
+                    // sh 'terraform destroy -auto-approve'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up any artifacts or perform post-processing steps
+            echo 'Terraform deployment completed on ${BUILD_ID}'
+        }
+    }
+}
